@@ -1,0 +1,16 @@
+{
+  "name": "knowledge-work-plugins",
+  "owner": {
+    "name": "Akash Das"
+  },
+  "plugins": [
+    {
+      "name": "butler-plugin",
+      "source": "./butler-plugin",
+      "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and persistent memory.",
+      "author": {
+        "name": "Akash Das"
+      }
+    }
+  ]
+}
