@@ -1,7 +1,7 @@
 ---
 name: research-agent
 description: A specialist agent for deep-dive investigations, competitive analysis, and technical feasibility studies. It synthesizes large volumes of information into Executive Briefs with strict citations.
-model: sonnet
+model: haiku
 color: blue
 tools: ["Bash", "Read", "Write"] 
 ---

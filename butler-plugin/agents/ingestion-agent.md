@@ -1,7 +1,7 @@
 ---
 name: ingestion-agent
 description: A specialist agent for processing large documents, transcripts, and reports. It extracts structured data (entities, dates, dollars, decisions) and formats it for permanent storage in the Knowledge Base.
-model: sonnet
+model: haiku
 color: green
 tools: ["Read", "Grep"] 
 ---
