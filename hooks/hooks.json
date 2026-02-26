@@ -1,0 +1,33 @@
+{
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-init.sh"
+        }
+      ]
+    }
+  ],
+  "UserPromptSubmit": [
+    {
+      "hooks":[
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks":[
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh"
+        }
+      ]
+    }
+  ]
+}
