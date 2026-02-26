@@ -1,10 +1,6 @@
 ---
 name: task-management
-description: >
-  Core SOP for managing the Master's task lifecycle and updating the visual dashboard. 
-  Use when the user asks "what's on my plate", "remind me to [X]", "add [X] to my list", 
-  "mark [X] as done", "I delegated [X] to [Y]", or when autonomously extracting action 
-  items from conversations, emails, or meetings.
+description: > Core SOP for managing the Master's task lifecycle and updating the visual dashboard. Use when the user asks "what's on my plate", "remind me to [X]", "add [X] to my list", "mark [X] as done", "I delegated [X] to [Y]", or when autonomously extracting action items from conversations, emails, or meetings.
 ---
 
 # Task Management Skill

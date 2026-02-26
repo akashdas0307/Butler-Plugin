@@ -1,10 +1,6 @@
 ---
 name: communication-style
-description: >
-  Draft high-fidelity emails, Slack messages, and communications that mimic the Master's 
-  voice. Use when the Master asks to "draft a reply", "email [X]", "respond to [Y]", 
-  "write a note", or "send a status update". Adapts tone based on audience 
-  (Internal/External/VIP) and medium.
+description: >Draft high-fidelity emails, Slack messages, and communications that mimic the Master's voice. Use when the Master asks to "draft a reply", "email [X]", "respond to [Y]" "write a note", or "send a status update". Adapts tone based on audience (Internal/External/VIP) and medium.
 ---
 
 # Communication Style Skill

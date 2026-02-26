@@ -4,7 +4,7 @@
     "name": "Akash Das"
   },
   "metadata": {
-    "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and persistent memory.",
+    "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and a persistent memory, This will evolve to the helping agent when used regularly.",
     "version": "1.1.0",
     "pluginRoot": "."
   },
@@ -12,7 +12,7 @@
     {
       "name": "butler-plugin",
       "source": ".",
-      "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and persistent memory.",
+      "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and a persistent memory, This will evolve to the helping agent when used regularly.",
       "version": "1.1.0",
       "keywords": ["butler-plugin", "butler"]
     }

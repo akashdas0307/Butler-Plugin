@@ -1,12 +1,6 @@
 ---
 name: document-ingestion
-description: >
-  Standard Operating Procedure for processing and saving large documents, PDFs, or long text blocks.
-  Use when the Master says "read this", "summarize this PDF", "ingest this report", "add this to memory", 
-  or "what does this document say".
-  Delegates processing to the `ingestion-agent` to preserve context window.
-  context: fork
-  agent: ingestion-agent
+description: > Standard Operating Procedure for processing and saving large documents, PDFs, or long text blocks. Use when the Master says "read this", "summarize this PDF", "ingest this report", "add this to memory", or "what does this document say". Delegates processing to the `ingestion-agent` to preserve context window. | context: fork | agent: ingestion-agent
 ---
 
 # Document Ingestion Skill

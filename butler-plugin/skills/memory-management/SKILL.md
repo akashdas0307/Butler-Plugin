@@ -1,10 +1,6 @@
 ---
 name: memory-management
-description: >
-  Core SOP for a two-tier memory system. Use this skill when the Master says "remember that [X]", 
-  "what did I say about [Y]", "who is [Z]", or "X stands for Y". Also use implicitly whenever 
-  the Master uses unrecognized shorthand, acronyms, nicknames, or project codes to decode 
-  their request before taking action.
+description: > Core SOP for a two-tier memory system. Use this skill when the Master says "remember that [X]", "what did I say about [Y]", "who is [Z]", or "X stands for Y". Also use implicitly whenever the Master uses unrecognized shorthand, acronyms, nicknames, or project codes to decode their request before taking action.
 ---
 
 # Memory Management Skill

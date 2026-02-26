@@ -1,9 +1,6 @@
 ---
 name: delegation-tracker
-description: >
-  Systematically track, monitor, and follow up on tasks the Master delegates to others. 
-  Use when the Master says "remind me to follow up with [X]", "I'm waiting on [Y]", 
-  "did [Z] get back to me?", or "check my pending items". Prevents dropped balls.
+description: > Systematically track, monitor, and follow up on tasks the Master delegates to others. Use when the Master says "remind me to follow up with [X]", "I'm waiting on [Y]", "did [Z] get back to me?", or "check my pending items". Prevents dropped balls.
 ---
 
 # Delegation Tracking Skill

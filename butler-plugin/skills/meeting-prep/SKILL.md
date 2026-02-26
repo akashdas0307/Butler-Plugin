@@ -1,10 +1,6 @@
 ---
 name: meeting-prep
-description: >
-  Draft high-impact executive briefings for meetings, interviews, or client calls. 
-  Use when the Master asks "prep me for my 2pm", "who am I meeting with", "what's next", 
-  "brief me on [X]", or "get me ready for the interview with [Y]". 
-  Combines calendar data, email history, and memory context into a single actionable document.
+description: > Draft high-impact executive briefings for meetings, interviews, or client calls. Use when the Master asks "prep me for my 2pm", "who am I meeting with", "what's next", "brief me on [X]", or "get me ready for the interview with [Y]". Combines calendar data, email history, and memory context into a single actionable document.
 ---
 
 # Meeting Preparation Skill

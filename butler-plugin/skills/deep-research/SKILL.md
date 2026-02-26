@@ -1,12 +1,6 @@
 ---
 name: deep-research
-description: >
-  Standard Operating Procedure for conducting comprehensive, multi-step research. 
-  Use when the Master asks "find out about [X]", "research [Y]", "look into [Z]", 
-  "who is [Person]", or "compare A vs B". 
-  Delegates execution to the `research-agent` subagent to preserve context window.
-  context: fork
-  agent: research-agent
+description: > Standard Operating Procedure for conducting comprehensive, multi-step research. Use when the Master asks "find out about [X]", "research [Y]", "look into [Z]", "who is [Person]", or "compare A vs B". Delegates execution to the `research-agent` subagent to preserve context window. | context: fork | agent: research-agent
 ---
 
 # Deep Research Skill
