@@ -12,7 +12,7 @@ Execute the following steps sequentially and strictly.
 
 Run once at the start. All subsequent steps depend on these variables.
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && echo "CLAUDE_PLUGIN_ROOT=$BUTLER" && echo "CLAUDE_PROJECT_DIR=$(dirname "$BUTLER")" && echo "OK"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && echo "CLAUDE_PLUGIN_ROOT=$BUTLER" && echo "CLAUDE_PROJECT_DIR=$(dirname "$BUTLER")" && echo "OK"`
 
 If the above returns empty or errors → halt and surface to Master: "Cannot locate butler-plugin folder. Ensure the project folder is mounted correctly."
 
@@ -20,7 +20,7 @@ If the above returns empty or errors → halt and surface to Master: "Cannot loc
 
 ## 1. Health Check
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && command -v jq > /dev/null && echo "jq: OK" || echo "jq: MISSING"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && command -v jq > /dev/null && echo "jq: OK" || echo "jq: MISSING"`
 
 If `jq: MISSING` → halt. Ask Master to install jq (`brew install jq` / `winget install jq`). Wait for confirmation.
 
@@ -52,25 +52,25 @@ For each core file created in Notion:
 
 **Step A — Resolve paths (run first, exports used by all steps below):**
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
 
 If `BUTLER` is empty → halt. The workspace is not mounted or butler-plugin folder is missing.
 
 **Step B — Create directories:**
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && mkdir -p "$PROJ/work" "$PROJ/archive" "$PROJ/memory" && echo "Dirs created at: $PROJ"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && mkdir -p "$PROJ/work" "$PROJ/archive" "$PROJ/memory" && echo "Dirs created at: $PROJ"`
 
 **Step C — Initialize core files:**
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && touch "$PROJ/CONVERSATION.md" && echo "CONVERSATION.md: OK"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && touch "$PROJ/CONVERSATION.md" && echo "CONVERSATION.md: OK"`
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/dashboard/butler-dashboard.html" "$PROJ/" 2>/dev/null && echo "dashboard: OK" || echo "WARN: dashboard not found, skipping"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/dashboard/butler-dashboard.html" "$PROJ/" 2>/dev/null && echo "dashboard: OK" || echo "WARN: dashboard not found, skipping"`
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/core-modules-references.json" "$PROJ/" 2>/dev/null || echo '{}' > "$PROJ/core-modules-references.json" && echo "core-modules-references.json: OK"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/core-modules-references.json" "$PROJ/" 2>/dev/null || echo '{}' > "$PROJ/core-modules-references.json" && echo "core-modules-references.json: OK"`
 
 **Step D — Verify:**
 
-!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && ls -la "$PROJ/"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && ls -la "$PROJ/"`
 
 If any of the above fail → surface the specific error to Master and halt. Do not proceed to Step 3 with a broken directory state.
 
