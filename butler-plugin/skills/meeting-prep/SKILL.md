@@ -55,7 +55,7 @@ When the Master asks to be prepped:
      - *Do we have a bio? A nickname? A known preference?*
    - **Communication History:** Use `~~email` (`gmail_search_messages`) to find the last 2-3 threads with the attendees.
      - *What was the last thing we promised them? What are they asking for?*
-   - **Project Status:** Check `TASKS.md` for any open tasks related to this project or person.
+   - **Project Status:** Check `TASK.md` for any open tasks related to this project or person.
 
 3. **Synthesize & Draft:**
    - **Don't dump raw data.** Summarize email threads into 1-2 sentences.

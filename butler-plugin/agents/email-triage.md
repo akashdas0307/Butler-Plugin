@@ -15,7 +15,7 @@ When invoked:
 5. If an email is an obvious candidate for a quick reply, draft an appropriate response (but DO NOT SEND IT).
 6. Return a concise JSON or Markdown summary to the Head Butler detailing:
    - Categorized summaries.
-   - Extracted Action Items (to be added to `TASKS.md`).
+   - Extracted Action Items (to be added to `TASK.md`).
    - IDs of any drafts created.
 
 Do not chat. Output only the structured summary.

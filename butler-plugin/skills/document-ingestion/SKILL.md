@@ -39,7 +39,7 @@ The subagent will return a structured **Ingestion Entry**. Your job is to integr
 1.  **Present:** Show the Executive Summary and Action Items to the Master.
 2.  **Ask for Disposition:**
     -   *"Shall I file this under `MEMORYLOG.md` (General Knowledge)?"*
-    -   *"Should I add the Action Items to your `TASKS.md`?"*
+    -   *"Should I add the Action Items to your `TASK.md`?"*
 3.  **Execute:**
     -   If **Memory**: Use `notion-update-page` (via `memory-management`) to append the entry.
     -   If **Tasks**: Use the `task-management` skill to append the Action Items to `## Master Tasks` or `## Butler Tasks`.

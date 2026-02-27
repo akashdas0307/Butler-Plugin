@@ -16,7 +16,7 @@ As a Chief of Staff, your job is to ensure that "delegated" does not mean "forgo
 
 ## 🏛️ The Tracking Architecture
 
-Delegated items live in the `## Waiting On` section of `TASKS.md`. The HTML Dashboard visualizes these distinctively.
+Delegated items live in the `## Waiting On` section of `TASK.md`. The HTML Dashboard visualizes these distinctively.
 
 ### The Data Schema
 Every delegated item must follow this format:
@@ -38,7 +38,7 @@ When the Master delegates a task during conversation or email drafting:
    - *Explicit:* "I need this by Friday." -> Use next Friday's date.
    - *Implicit:* "Urgent." -> +1 day.
    - *Default:* -> +3 business days.
-3. **Log to `TASKS.md`:** Append to `## Waiting On`.
+3. **Log to `TASK.md`:** Append to `## Waiting On`.
 4. **Confirm:** "Logged. Tracking 'X' with Todd, due [Date]."
 
 ### 2. The Morning Audit (Run during `/morning`)
@@ -46,7 +46,7 @@ Every morning, the Butler scans `## Waiting On`.
 
 **Logic:**
 - **If Due Date > Today:** Do nothing. (Status: Pending).
-- **If Due Date == Today:** Add a `**[Due Today]**` tag to the task in `TASKS.md`.
+- **If Due Date == Today:** Add a `**[Due Today]**` tag to the task in `TASK.md`.
 - **If Due Date < Today:** Flag as `**[OVERDUE]**`. 
   - **Action:** Automatically use `gmail_create_draft` to draft a generic "bump" email to the owner.
   - **Notify:** Add a notification to `NOTIFICATIONS.md`: "Todd is late on Q3 Budget. Draft follow-up created."
@@ -54,7 +54,7 @@ Every morning, the Butler scans `## Waiting On`.
 ### 3. The Follow-Up Protocol
 When the Master asks "who do I need to nudge?" or "check delegations":
 
-1. **Scan:** Read `TASKS.md` -> `## Waiting On`.
+1. **Scan:** Read `TASK.md` -> `## Waiting On`.
 2. **Filter:** Identify all items where `Due Date <= Today`.
 3. **Report:**
    - "You have 3 items pending follow-up:"
