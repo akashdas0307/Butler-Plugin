@@ -5,12 +5,14 @@ EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty')
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 LOG_FILE="${CLAUDE_PROJECT_DIR}/CONVERSATION.md"
 
-if[ "$EVENT" = "UserPromptSubmit" ]; then
+# Guard against missing file
+touch "$LOG_FILE"
+
+if [ "$EVENT" = "UserPromptSubmit" ]; then
     MSG=$(echo "$INPUT" | jq -r '.prompt // empty')
-    echo "**Master [${DATE}]:** ${MSG}" >> "$LOG_FILE"
-elif[ "$EVENT" = "Stop" ]; then
-    echo "**Butler [${DATE}]:** [Task Completed / Responded]" >> "$LOG_FILE"
+    echo -e "\n**Master [${DATE}]:** ${MSG}" >> "$LOG_FILE"
+elif [ "$EVENT" = "Stop" ]; then
+    MSG=$(echo "$INPUT" | jq -r '.message // .text // "[Response]"')
+    echo -e "**Butler [${DATE}]:** ${MSG}" >> "$LOG_FILE"
     echo "---" >> "$LOG_FILE"
 fi
-
-exit 0

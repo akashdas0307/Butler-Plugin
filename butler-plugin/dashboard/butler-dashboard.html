@@ -634,7 +634,7 @@
 
     async function loadAllFiles() {
       // Load TASKS
-      const taskData = await getFileSilently('TASKS.md');
+      const taskData = await getFileSilently('TASK.md');
       if(taskData) {
         fileHandles.tasks = taskData.handle;
         lastModified.tasks = taskData.file.lastModified;
