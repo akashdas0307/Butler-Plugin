@@ -1,0 +1,9 @@
+{
+  "CLAUDE.md":     { "notion_page_id": "", "created": "", "label": "Hot Cache" },
+  "USER.md":       { "notion_page_id": "", "created": "", "label": "Master Profile" },
+  "SOUL.md":       { "notion_page_id": "", "created": "", "label": "Butler Soul" },
+  "SCRATCHPAD.md": { "notion_page_id": "", "created": "", "label": "Scratchpad" },
+  "MEMORYLOG.md":  { "notion_page_id": "", "created": "", "label": "Memory Log" },
+  "TASK.md":       { "notion_page_id": "", "created": "", "label": "Task Board" },
+  "SIGNOFF.md":    { "notion_page_id": "", "created": "", "label": "Night Signoff" }
+}
