@@ -26,17 +26,22 @@ For each core file created in Notion:
 
 ## 2.5 — Local Directory & File Initialization
 
-Run sequentially. Do not proceed if any command fails.
+First, validate environment variables are set:
+!`echo "PROJECT_DIR=${CLAUDE_PROJECT_DIR}" && echo "PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT}"`
 
-!`mkdir -p ${CLAUDE_PROJECT_DIR}/{work,archive,memory}`
-!`touch ${CLAUDE_PROJECT_DIR}/CONVERSATION.md`
-!`cp ${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html ${CLAUDE_PROJECT_DIR}/`
-!`cp ${CLAUDE_PLUGIN_ROOT}/core-modules-references.json ${CLAUDE_PROJECT_DIR}/ 2>/dev/null || echo "{}" > ${CLAUDE_PROJECT_DIR}/core-modules-references.json`
+If either variable is empty or missing, set safe defaults:
+!`export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$HOME/.butler}" && export CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.butler-plugin}" && echo "Using PROJECT_DIR=$CLAUDE_PROJECT_DIR"`
 
-Confirm all directories exist:
-!`ls -la ${CLAUDE_PROJECT_DIR}/`
+Then run sequentially:
+!`mkdir -p "${CLAUDE_PROJECT_DIR}/work" "${CLAUDE_PROJECT_DIR}/archive" "${CLAUDE_PROJECT_DIR}/memory"`
+!`touch "${CLAUDE_PROJECT_DIR}/CONVERSATION.md"`
+!`cp "${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html" "${CLAUDE_PROJECT_DIR}/" 2>/dev/null || echo "WARN: dashboard not found, skipping"`
+!`cp "${CLAUDE_PLUGIN_ROOT}/core-modules-references.json" "${CLAUDE_PROJECT_DIR}/" 2>/dev/null || echo '{}' > "${CLAUDE_PROJECT_DIR}/core-modules-references.json"`
 
-If any of the above fail, surface the specific error to Master and halt. Do not proceed to Step 3 with a broken directory state.
+Confirm directories exist:
+!`ls -la "${CLAUDE_PROJECT_DIR}/"`
+
+If mkdir fails, surface the exact error and halt. Do not proceed to Step 3.
 
 ## 3. Local Registration
 (Handled in 2.3) Ensure `core-modules-references.json` in the local working directory is valid JSON mapping file names to their Notion UUIDs and metadata.
