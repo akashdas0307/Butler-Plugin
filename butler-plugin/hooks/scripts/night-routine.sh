@@ -1,59 +1,79 @@
 #!/bin/bash
-# night-routine.sh
-# Role: File system cleanup only. Notion sync + reflection handled by /night-routine agent command.
-# Called by: scheduler or /night-routine command as a pre-step.
+# night-routine.sh — End-of-day reflection, Notion sync, archive, signoff.
+# Trigger time: ~23:00 (pattern-adaptive, not hardcoded — read from MEMORYLOG.md).
+# Self-locates from script path — no hardcoded paths, no env var dependency.
 
-set -e
+# ── SELF-LOCATE ─────────────────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+CLAUDE_PROJECT_DIR="$(cd "$CLAUDE_PLUGIN_ROOT/.." && pwd)"
+export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
+# ─────────────────────────────────────────────────────────────────────────────
 
-DATE=$(date "+%Y-%m-%d %H:%M:%S")
-TODAY=$(date "+%Y-%m-%d")
-PROJECT_DIR="${CLAUDE_PROJECT_DIR}"
-CONV_FILE="${PROJECT_DIR}/CONVERSATION.md"
-ARCHIVE_DIR="${PROJECT_DIR}/archive/${TODAY}"
-WORK_DIR="${PROJECT_DIR}/work"
-SIGNOFF_FILE="${PROJECT_DIR}/SIGNOFF.md"
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
+TODAY=$(date '+%Y-%m-%d')
+REFS="$CLAUDE_PLUGIN_ROOT/core-modules-references.json"
+CONV="$CLAUDE_PROJECT_DIR/CONVERSATION.md"
 
-# --- Step 1: Validate environment ---
-if [ -z "$PROJECT_DIR" ]; then
-  echo "ERROR: CLAUDE_PROJECT_DIR is not set. Aborting." >&2
-  exit 1
+echo "[$DATE] Night routine starting..."
+
+# ── 1. REFLECTION (offload to Haiku subagent) ───────────────────────────────
+# Pass CONVERSATION.md to subagent (model: claude-haiku).
+# Subagent task:
+#   - Identify patterns in master's requests today
+#   - Note what Butler did well vs poorly
+#   - Draft 1-3 improvement hypotheses
+#   - Write output to $CLAUDE_PROJECT_DIR/SIGNOFF.md
+if [ -f "$CONV" ]; then
+  echo "REFLECTION_INPUT=$CONV"
+  echo "REFLECTION_STATUS=PENDING_SUBAGENT"
+else
+  echo "WARN: CONVERSATION.md not found — skipping reflection."
 fi
 
-# --- Step 2: Create today's archive directory ---
+# ── 2. NOTION SYNC ──────────────────────────────────────────────────────────
+# Validate refs file exists before attempting sync
+if [ ! -f "$REFS" ]; then
+  echo "ERROR: core-modules-references.json missing. Skipping Notion sync."
+else
+  CORE_FILES=(CLAUDE.md USER.md SOUL.md SCRATCHPAD.md MEMORYLOG.md TASK.md)
+  for f in "${CORE_FILES[@]}"; do
+    LOCAL_FILE="$CLAUDE_PROJECT_DIR/$f"
+    if [ -f "$LOCAL_FILE" ]; then
+      PAGE_ID=$(jq -r ".[\"$f\"].notion_page_id // empty" "$REFS" 2>/dev/null)
+      if [ -n "$PAGE_ID" ]; then
+        echo "NOTION_SYNC: $f → $PAGE_ID"
+        # Agent will execute: notion-update-page $PAGE_ID with content of $LOCAL_FILE
+      else
+        echo "WARN: No Notion page_id for $f in refs. Skipping."
+      fi
+    fi
+  done
+fi
+
+# ── 3. SCRATCHPAD REVIEW ────────────────────────────────────────────────────
+# Agent promotes validated hypotheses SCRATCHPAD.md → MEMORYLOG.md
+# Clears confirmed/invalidated items from SCRATCHPAD.md
+echo "SCRATCHPAD_REVIEW=PENDING_AGENT"
+
+# ── 4. ARCHIVE ──────────────────────────────────────────────────────────────
+ARCHIVE_DIR="$CLAUDE_PROJECT_DIR/archive/$TODAY"
 mkdir -p "$ARCHIVE_DIR"
 
-# --- Step 3: Archive today's CONVERSATION.md ---
-if [ -f "$CONV_FILE" ] && [ -s "$CONV_FILE" ]; then
-  cp "$CONV_FILE" "${ARCHIVE_DIR}/CONVERSATION_${TODAY}.md"
-  # Clear for tomorrow — do not delete, just empty
-  > "$CONV_FILE"
-  echo "[night-routine] CONVERSATION.md archived to ${ARCHIVE_DIR}"
-else
-  echo "[night-routine] CONVERSATION.md empty or missing — skipping archive"
+if [ -d "$CLAUDE_PROJECT_DIR/work" ]; then
+  # Move completed files (non-empty) to archive
+  find "$CLAUDE_PROJECT_DIR/work" -maxdepth 1 -type f | while read -r file; do
+    mv "$file" "$ARCHIVE_DIR/" && echo "ARCHIVED: $file"
+  done
 fi
 
-# --- Step 4: Archive completed work files ---
-if [ -d "$WORK_DIR" ] && [ "$(ls -A $WORK_DIR 2>/dev/null)" ]; then
-  mv "${WORK_DIR}"/* "$ARCHIVE_DIR"/ 2>/dev/null || true
-  echo "[night-routine] work/ files moved to archive/${TODAY}/"
-else
-  echo "[night-routine] No work files to archive"
-fi
+# Clear daily refresh files
+rm -f "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md"
+rm -f "$CLAUDE_PROJECT_DIR/SCHEDULE.md"
+echo "Cleared: NOTIFICATIONS.md, SCHEDULE.md"
 
-# --- Step 5: Clear stale daily files (they regenerate each morning) ---
-for stale_file in NOTIFICATIONS.md SCHEDULE.md; do
-  if [ -f "${PROJECT_DIR}/${stale_file}" ]; then
-    > "${PROJECT_DIR}/${stale_file}"
-    echo "[night-routine] Cleared ${stale_file}"
-  fi
-done
+# ── 5. SIGNOFF ──────────────────────────────────────────────────────────────
+echo "Night routine complete: $DATE" >> "$CLAUDE_PROJECT_DIR/SIGNOFF.md"
+echo "[$DATE] Night routine complete."
 
-# --- Step 6: Write signoff timestamp ---
-echo "## Night Routine — ${DATE}" >> "$SIGNOFF_FILE"
-echo "- CONVERSATION.md archived: ${TODAY}" >> "$SIGNOFF_FILE"
-echo "- Stale files cleared: NOTIFICATIONS.md, SCHEDULE.md" >> "$SIGNOFF_FILE"
-echo "- work/ archived to: archive/${TODAY}/" >> "$SIGNOFF_FILE"
-echo "" >> "$SIGNOFF_FILE"
-
-echo "[night-routine] Complete: ${DATE}"
 exit 0

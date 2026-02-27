@@ -6,45 +6,81 @@ description: Initialize the Butler system, check health, and establish boundarie
 
 Execute the following steps sequentially and strictly.
 
-## 1. Health Check
-Check if `jq` is installed by running: !`command -v jq || echo "MISSING"`
-If it returns "MISSING", halt and use `AskUserQuestion` to ask the Master to install `jq` (e.g., `brew install jq` or `winget install jq`). Wait for confirmation before proceeding.
+---
 
-Check connection to the `notion`, `gmail`, and `google-calendar` MCP servers. If any are missing, advise the Master how to connect them and halt.
+## 0. Resolve Workspace Paths
+
+Run once at the start. All subsequent steps depend on these variables.
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && echo "CLAUDE_PLUGIN_ROOT=$BUTLER" && echo "CLAUDE_PROJECT_DIR=$(dirname "$BUTLER")" && echo "OK"`
+
+If the above returns empty or errors → halt and surface to Master: "Cannot locate butler-plugin folder. Ensure the project folder is mounted correctly."
+
+---
+
+## 1. Health Check
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && command -v jq > /dev/null && echo "jq: OK" || echo "jq: MISSING"`
+
+If `jq: MISSING` → halt. Ask Master to install jq (`brew install jq` / `winget install jq`). Wait for confirmation.
+
+Check connection to `notion`, `gmail`, and `google-calendar` MCP servers. If any are missing, advise Master how to connect them and halt.
+
+---
 
 ## 2. Notion Initialization
+
 Using the `notion` MCP (`notion-create-page`):
 1. Create a root page/database for the Butler.
 2. Inside it, create 6 separate pages: `CLAUDE`, `USER`, `SOUL`, `SCRATCHPAD`, `TASK`, and `MEMORYLOG`.
 
+---
+
 ## 2.3 — UUID Capture (After Each Notion Page Created)
+
 For each core file created in Notion:
-- Extract the `page_id` from the Notion API response
-- Append to core-modules-references.json:
+- Extract the `page_id` from the Notion API response.
+- Append to `core-modules-references.json`:
+  ```json
   { "filename": { "notion_page_id": "<extracted_id>", "created": "<today>", "label": "<label>" } }
+  ```
 - Do NOT proceed to next page creation until this write is confirmed.
+
+---
 
 ## 2.5 — Local Directory & File Initialization
 
-First, validate environment variables are set:
-!`echo "PROJECT_DIR=${CLAUDE_PROJECT_DIR}" && echo "PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT}"`
+**Step A — Resolve paths (run first, exports used by all steps below):**
 
-If either variable is empty or missing, set safe defaults:
-!`export CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$HOME/.butler}" && export CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$HOME/.butler-plugin}" && echo "Using PROJECT_DIR=$CLAUDE_PROJECT_DIR"`
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
 
-Then run sequentially:
-!`mkdir -p "${CLAUDE_PROJECT_DIR}/work" "${CLAUDE_PROJECT_DIR}/archive" "${CLAUDE_PROJECT_DIR}/memory"`
-!`touch "${CLAUDE_PROJECT_DIR}/CONVERSATION.md"`
-!`cp "${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html" "${CLAUDE_PROJECT_DIR}/" 2>/dev/null || echo "WARN: dashboard not found, skipping"`
-!`cp "${CLAUDE_PLUGIN_ROOT}/core-modules-references.json" "${CLAUDE_PROJECT_DIR}/" 2>/dev/null || echo '{}' > "${CLAUDE_PROJECT_DIR}/core-modules-references.json"`
+If `BUTLER` is empty → halt. The workspace is not mounted or butler-plugin folder is missing.
 
-Confirm directories exist:
-!`ls -la "${CLAUDE_PROJECT_DIR}/"`
+**Step B — Create directories:**
 
-If mkdir fails, surface the exact error and halt. Do not proceed to Step 3.
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && mkdir -p "$PROJ/work" "$PROJ/archive" "$PROJ/memory" && echo "Dirs created at: $PROJ"`
+
+**Step C — Initialize core files:**
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && touch "$PROJ/CONVERSATION.md" && echo "CONVERSATION.md: OK"`
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/dashboard/butler-dashboard.html" "$PROJ/" 2>/dev/null && echo "dashboard: OK" || echo "WARN: dashboard not found, skipping"`
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && cp "$BUTLER/core-modules-references.json" "$PROJ/" 2>/dev/null || echo '{}' > "$PROJ/core-modules-references.json" && echo "core-modules-references.json: OK"`
+
+**Step D — Verify:**
+
+!`BUTLER=$(find /sessions -maxdepth 6 -name "butler-plugin" -type d 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && ls -la "$PROJ/"`
+
+If any of the above fail → surface the specific error to Master and halt. Do not proceed to Step 3 with a broken directory state.
+
+---
 
 ## 3. Local Registration
-(Handled in 2.3) Ensure `core-modules-references.json` in the local working directory is valid JSON mapping file names to their Notion UUIDs and metadata.
+
+Ensure `core-modules-references.json` in the local working directory is valid JSON mapping file names to their Notion UUIDs and metadata. (Handled via Step 2.3.)
+
+---
 
 ## 4. Master Interrogation
 
@@ -76,21 +112,16 @@ Ask these questions in ONE grouped message using AskUserQuestion:
 15. Any email threads or senders to permanently ignore?
 
 After receiving answers:
-- Populate SOUL.template.md with answers from Q10, Q11, Q12
-- Populate USER.template.md with answers from Q1–Q9, Q13–Q15
-- Write both to Notion (capture UUIDs → write to core-modules-references.json)
-- Write local copies to ${CLAUDE_PROJECT_DIR}/
-
-## 5. Night Routine Scheduling
-
-Tell Master:
-
-"To activate your 11 PM night routine, run `/schedule` and paste this when prompted:"
+- Populate `SOUL.md` with answers from Q10, Q11, Q12
+- Populate `USER.md` with answers from Q1–Q9, Q13–Q15
+- Write both to Notion (capture UUIDs → write to `core-modules-references.json`)
+- Write local copies to resolved `$PROJ/`
 
 ---
-**Task name:** Butler Night Routine  
-**Schedule:** Daily at 23:00  
-**Command:** /night-routine  
----
 
-This will run automatically every night to archive your day and sync to Notion.
+## 5. Scheduling Instruction
+
+Inform Master:
+- Type `/morning` at the start of each day to begin your session.
+- Type `/update` to sync memory and Notion mid-session or before closing.
+- Onboarding is now complete.
