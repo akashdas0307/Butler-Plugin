@@ -76,5 +76,16 @@ After receiving answers:
 - Write both to Notion (capture UUIDs → write to core-modules-references.json)
 - Write local copies to ${CLAUDE_PROJECT_DIR}/
 
-## 5. Scheduling Instruction
-Instruct the Master: "Initialization complete. Please type `/schedule` to create a daily recurring task at 11:00 PM that runs the command `/night-routine`."
+## 5. Night Routine Scheduling
+
+Tell Master:
+
+"To activate your 11 PM night routine, run `/schedule` and paste this when prompted:"
+
+---
+**Task name:** Butler Night Routine  
+**Schedule:** Daily at 23:00  
+**Command:** /night-routine  
+---
+
+This will run automatically every night to archive your day and sync to Notion.

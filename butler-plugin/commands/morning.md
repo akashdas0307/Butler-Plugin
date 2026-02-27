@@ -32,10 +32,7 @@ Parse output:
 ## 3. Dashboard Prep
 
 # 3a — Ensure dashboard exists (COPY, never regenerate)
-DASH="${CLAUDE_PROJECT_DIR}/butler-dashboard.html"
-if [ ! -f "$DASH" ]; then
-  cp "${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html" "$DASH"
-fi
+!`DASH="${CLAUDE_PROJECT_DIR}/butler-dashboard.html"; if [ ! -f "$DASH" ]; then cp "${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html" "$DASH"; fi`
 
 # 3b — Offload triage and calendar to Haiku subagents (token efficiency)
 Spawn subagent [model: haiku] → Task: "Read emails from NOTIFICATIONS.md. Categorize each as [Important], [Financial], [General], or [Other] based on USER.md triage rules. Output structured list only."
