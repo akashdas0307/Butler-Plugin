@@ -10,10 +10,10 @@ Execute the following steps sequentially and strictly.
 Check if `jq` is installed by running: !`command -v jq || echo "MISSING"`
 If it returns "MISSING", halt and use `AskUserQuestion` to ask the Master to install `jq` (e.g., `brew install jq` or `winget install jq`). Wait for confirmation before proceeding.
 
-Check connection to `~~knowledge base`, `~~email`, and `~~calendar` MCPs. If any are missing, advise the Master how to connect them and halt.
+Check connection to the `notion`, `gmail`, and `google-calendar` MCP servers. If any are missing, advise the Master how to connect them and halt.
 
 ## 2. Notion Initialization
-Using the `~~knowledge base` MCP (`notion-create-pages`):
+Using the `notion` MCP (`notion-create-page`):
 1. Create a root page/database for the Butler.
 2. Inside it, create 6 separate pages: `CLAUDE`, `USER`, `SOUL`, `SCRATCHPAD`, `TASK`, and `MEMORYLOG`.
 
@@ -26,13 +26,17 @@ For each core file created in Notion:
 
 ## 2.5 — Local Directory & File Initialization
 
-Run sequentially:
+Run sequentially. Do not proceed if any command fails.
+
 !`mkdir -p ${CLAUDE_PROJECT_DIR}/{work,archive,memory}`
 !`touch ${CLAUDE_PROJECT_DIR}/CONVERSATION.md`
 !`cp ${CLAUDE_PLUGIN_ROOT}/dashboard/butler-dashboard.html ${CLAUDE_PROJECT_DIR}/`
-!`cp ${CLAUDE_PLUGIN_ROOT}/core-modules-references.json ${CLAUDE_PROJECT_DIR}/ 2>/dev/null || echo '{}' > ${CLAUDE_PROJECT_DIR}/core-modules-references.json`
+!`cp ${CLAUDE_PLUGIN_ROOT}/core-modules-references.json ${CLAUDE_PROJECT_DIR}/ 2>/dev/null || echo "{}" > ${CLAUDE_PROJECT_DIR}/core-modules-references.json`
 
-Confirm directories exist before proceeding.
+Confirm all directories exist:
+!`ls -la ${CLAUDE_PROJECT_DIR}/`
+
+If any of the above fail, surface the specific error to Master and halt. Do not proceed to Step 3 with a broken directory state.
 
 ## 3. Local Registration
 (Handled in 2.3) Ensure `core-modules-references.json` in the local working directory is valid JSON mapping file names to their Notion UUIDs and metadata.

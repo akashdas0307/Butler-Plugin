@@ -26,8 +26,8 @@ Parse output:
   → Stop.
 
 ## 2. Information Gathering
-- **Email**: Use `~~email` to fetch `is:unread newer_than:1d` (Max 20).
-- **Calendar**: Use `~~calendar` to pull today's schedule and imminent deadlines.
+- **Email**: Use the `gmail` MCP — search for `is:unread newer_than:1d`, limit 20 results. Write output to NOTIFICATIONS.md.
+- **Calendar**: Use the `google-calendar` MCP — list all events for today. Write output to SCHEDULE.md.
 
 ## 3. Dashboard Prep
 
