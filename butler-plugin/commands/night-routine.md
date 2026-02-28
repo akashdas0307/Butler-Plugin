@@ -8,10 +8,11 @@ Execute the Good Night protocol strictly and sequentially.
 
 ## 0. Resolve Paths
 
-!`BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d -not -path "*/.local-plugins/*" -not -path "*/.skills/*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
+!`BUTLER=$(find /sessions -path "*/.local-plugins/cache/butler-plugin/butler-plugin/*/scripts/cold-boot.sh" -type f 2>/dev/null | sort -V | tail -1 | xargs dirname | xargs dirname) && PROJ="$(find /sessions/*/mnt -maxdepth 1 -type d ! -name "mnt" ! -name ".*" 2>/dev/null | head -1)" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
 
-- `BUTLER` = butler/ folder (plugin infra, CONVERSATION.md, session files)
+- `BUTLER` = plugin directory (plugin infra, scripts, templates)
 - `PROJ` = workspace root (CLAUDE.md, USER.md, TASK.md, SOUL.md, SCRATCHPAD.md, MEMORYLOG.md)
+- Session folder: `$PROJ/butler/` (CONVERSATION.md, NOTIFICATIONS.md, SCHEDULE.md)
 
 ## 1. Trigger Reflection
 

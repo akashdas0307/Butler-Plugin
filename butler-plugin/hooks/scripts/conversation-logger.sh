@@ -9,25 +9,25 @@
 #   4. Fallback Stop detection via .message/.text presence
 #   5. Self-locates butler dir via find (plugin cache is read-only)
 
-BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d \
-  -not -path "*/.local-plugins/*" \
-  -not -path "*/.skills/*" \
-  2>/dev/null | head -1)
+BUTLER=$(find /sessions -path "*/.local-plugins/cache/butler-plugin/butler-plugin/*/scripts/cold-boot.sh" -type f 2>/dev/null | sort -V | tail -1 | xargs dirname | xargs dirname)
 
 if [ -z "$BUTLER" ]; then
-  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-  BUTLER="$(cd "$SCRIPT_DIR/../.." && pwd)"
+  echo "ERROR: Cannot locate butler-plugin"
+  exit 1
 fi
 
 CLAUDE_PLUGIN_ROOT="$BUTLER"
-CLAUDE_PROJECT_DIR="$BUTLER"
+CLAUDE_PROJECT_DIR="$(find /sessions/*/mnt -maxdepth 1 -type d ! -name "mnt" ! -name ".*" 2>/dev/null | head -1)"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 
+# Session folder location (for CONVERSATION.md)
+SESSION_DIR="$CLAUDE_PROJECT_DIR/butler"
+
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
-LOG_FILE="$CLAUDE_PROJECT_DIR/CONVERSATION.md"
+LOG_FILE="$SESSION_DIR/CONVERSATION.md"
 INPUT=$(cat)
 
-touch "$LOG_FILE"
+mkdir -p "$SESSION_DIR" && touch "$LOG_FILE"
 
 EVENT=$(echo "$INPUT" | jq -r '.event // .hook_event_name // empty' 2>/dev/null)
 

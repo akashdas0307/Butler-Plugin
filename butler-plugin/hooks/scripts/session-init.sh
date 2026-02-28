@@ -3,27 +3,22 @@
 # Reads today's CONTEXT_DUMP.md and prints it into context if fresh.
 
 # ── SELF-LOCATE ─────────────────────────────────────────────────────────────
-# The hook scripts live inside the read-only plugin cache (.local-plugins).
-# We must find the user's actual "butler" project folder in the workspace.
-BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d \
-  -not -path "*/.local-plugins/*" \
-  -not -path "*/.skills/*" \
-  2>/dev/null | head -1)
+# Finds the latest cached plugin version and the workspace root independently.
+BUTLER=$(find /sessions -path "*/.local-plugins/cache/butler-plugin/butler-plugin/*/scripts/cold-boot.sh" -type f 2>/dev/null | sort -V | tail -1 | xargs dirname | xargs dirname)
 
 if [ -z "$BUTLER" ]; then
-  # Fallback: resolve from script path (works if plugin is installed in workspace)
-  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-  BUTLER="$(cd "$SCRIPT_DIR/../.." && pwd)"
+  echo "ERROR: Cannot locate butler-plugin"
+  exit 1
 fi
 
 CLAUDE_PLUGIN_ROOT="$BUTLER"
-CLAUDE_PROJECT_DIR="$BUTLER"
+CLAUDE_PROJECT_DIR="$(find /sessions/*/mnt -maxdepth 1 -type d ! -name "mnt" ! -name ".*" 2>/dev/null | head -1)"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 # ─────────────────────────────────────────────────────────────────────────────
 
 TODAY=$(date '+%Y-%m-%d')
 DUMP_FILE="$CLAUDE_PROJECT_DIR/CONTEXT_DUMP.md"
-CORE_FILES=(CLAUDE.md USER.md SOUL.md SCRATCHPAD.md MEMORYLOG.md)
+CORE_FILES=(CLAUDE.md USER.md SOUL.md SCRATCHPAD.md MEMORYLOG.md TASK.md)
 ALL_PRESENT=true
 
 # Check if today's context dump exists

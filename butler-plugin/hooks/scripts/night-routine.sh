@@ -11,16 +11,23 @@
 # USAGE: Replace hooks/scripts/night-routine.sh with this version in the plugin
 
 # ── SELF-LOCATE ─────────────────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CLAUDE_PROJECT_DIR="$(cd "$CLAUDE_PLUGIN_ROOT/.." && pwd)"
+# Finds the latest cached plugin version and the workspace root independently.
+BUTLER=$(find /sessions -path "*/.local-plugins/cache/butler-plugin/butler-plugin/*/scripts/cold-boot.sh" -type f 2>/dev/null | sort -V | tail -1 | xargs dirname | xargs dirname)
+
+if [ -z "$BUTLER" ]; then
+  echo "ERROR: Cannot locate butler-plugin"
+  exit 1
+fi
+
+CLAUDE_PLUGIN_ROOT="$BUTLER"
+CLAUDE_PROJECT_DIR="$(find /sessions/*/mnt -maxdepth 1 -type d ! -name "mnt" ! -name ".*" 2>/dev/null | head -1)"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 # ─────────────────────────────────────────────────────────────────────────────
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 TODAY=$(date '+%Y-%m-%d')
-REFS="$CLAUDE_PLUGIN_ROOT/core-modules-references.json"
-CONV="$CLAUDE_PROJECT_DIR/CONVERSATION.md"
+REFS="$CLAUDE_PROJECT_DIR/core-modules-references.json"
+CONV="$CLAUDE_PROJECT_DIR/butler/CONVERSATION.md"
 
 echo "[$DATE] Night routine starting (OPTIMIZED)..."
 START_TIME=$(date +%s)
@@ -120,8 +127,8 @@ if [ -f "$CONV" ]; then
 fi
 
 # Clear daily refresh files
-[ -f "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md" ] && rm -f "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md" && echo "  ✓ Cleared: NOTIFICATIONS.md"
-[ -f "$CLAUDE_PROJECT_DIR/SCHEDULE.md" ] && rm -f "$CLAUDE_PROJECT_DIR/SCHEDULE.md" && echo "  ✓ Cleared: SCHEDULE.md"
+[ -f "$CLAUDE_PROJECT_DIR/butler/NOTIFICATIONS.md" ] && rm -f "$CLAUDE_PROJECT_DIR/butler/NOTIFICATIONS.md" && echo "  ✓ Cleared: NOTIFICATIONS.md"
+[ -f "$CLAUDE_PROJECT_DIR/butler/SCHEDULE.md" ] && rm -f "$CLAUDE_PROJECT_DIR/butler/SCHEDULE.md" && echo "  ✓ Cleared: SCHEDULE.md"
 
 # ── TIMING & SIGNOFF ────────────────────────────────────────────────────────
 END_TIME=$(date +%s)
