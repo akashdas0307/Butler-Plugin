@@ -3,16 +3,22 @@
 # Self-locates from script path — no hardcoded paths, no env var dependency.
 
 # ── SELF-LOCATE ─────────────────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CLAUDE_PROJECT_DIR="$(cd "$CLAUDE_PLUGIN_ROOT/.." && pwd)"
+# Finds plugin cache and workspace independently — folder-rename proof.
+CLAUDE_PLUGIN_ROOT=$(find /sessions -path "*/.local-plugins/cache/butler-plugin/butler-plugin/*/scripts/cold-boot.sh" -type f 2>/dev/null | sort -V | tail -1 | xargs dirname | xargs dirname)
+
+if [ -z "$CLAUDE_PLUGIN_ROOT" ]; then
+  echo "ERROR: Cannot locate butler-plugin"
+  exit 1
+fi
+
+CLAUDE_PROJECT_DIR="$(find /sessions/*/mnt -maxdepth 1 -type d ! -name "mnt" ! -name ".*" 2>/dev/null | head -1)"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 # ─────────────────────────────────────────────────────────────────────────────
 
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
 TODAY=$(date '+%Y-%m-%d')
 DUMP_FILE="$CLAUDE_PROJECT_DIR/CONTEXT_DUMP.md"
-REFS="$CLAUDE_PLUGIN_ROOT/core-modules-references.json"
+REFS="$CLAUDE_PROJECT_DIR/core-modules-references.json"
 CORE_FILES=(CLAUDE.md USER.md SOUL.md SCRATCHPAD.md MEMORYLOG.md TASK.md)
 MISSING_FILES=()
 
