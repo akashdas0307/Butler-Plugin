@@ -21,10 +21,12 @@ For each task assigned to you:
 
 2. **Execute**: Perform the task autonomously.
 
-3. **Update UI**: Move the completed task from `## Butler Tasks` to `## Done` in `TASK.md`. Ensure you write the file to the local disk immediately so the Master's HTML Dashboard updates in real-time.
+3. **Update Local Files (MANDATORY — do this immediately after each task, before moving to the next):**
+   - **Calendar action** → Append the new event as a row to the `## Today's Events` table in `SCHEDULE.md`. Format: `| HH:MM AM/PM – HH:MM AM/PM | [emoji] Event Title | Brief notes |`. If the table doesn't exist yet, create it with header `| Time | Event | Notes |\n|------|-------|-------|` first. Save the file to disk immediately.
+   - **Task completed** → Move it from `## Butler Tasks` to `## Done` in `TASK.md` and save to disk immediately.
+   - **Email handled** → Remove that email entry from `NOTIFICATIONS.md` and save to disk immediately.
 
-## 3. Clear Notifications
-If a task involved handling an email from `NOTIFICATIONS.md`, remove that email from the Notifications file and save it, clearing it from the Master's dashboard.
+   > The HTML dashboard polls local files every second. Writing to disk is what makes the dashboard update in real-time.
 
-## 4. Report
+## 3. Report
 When all `## Butler Tasks` are complete, output exactly: "Master, my assigned tasks are complete and the Dashboard has been updated. I am standing by."

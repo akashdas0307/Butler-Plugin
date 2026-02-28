@@ -414,6 +414,37 @@
     .section-picker button { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 13px; background: transparent; border: none; border-radius: 6px; }
     .section-picker button:hover { background: var(--bg-secondary); }
 
+    /* ===== SCHEDULE TIMELINE STYLES ===== */
+    .schedule-header { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 16px; }
+    .schedule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px var(--shadow);
+      transition: box-shadow 0.15s ease;
+    }
+    .schedule-item:hover { box-shadow: 0 4px 12px var(--shadow-hover); }
+    .schedule-item.butler-event { border-left: 4px solid var(--badge-butler); }
+    .schedule-item.master-event { border-left: 4px solid var(--accent); }
+    .schedule-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      min-width: 140px;
+      padding-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .schedule-event { flex: 1; min-width: 0; }
+    .schedule-event-title { font-size: 15px; color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+    .schedule-event-notes { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+    .schedule-meta { font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; }
+
     /* ===== MEMORY STYLES ===== */
     .memory-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; background: var(--bg-secondary); padding: 4px; border-radius: 8px; flex-shrink: 0; }
     .memory-tab { background: transparent; color: var(--text-muted); padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s ease; text-transform: capitalize; }
@@ -1239,21 +1270,103 @@
     // ===== SCHEDULE LOGIC (NEW) =====
     // ============================================================
     function renderSchedule(content) {
-      if(!content.trim()) return;
+      if (!content || !content.trim()) return;
+
+      const lines = content.split('\n');
+      const items = [];
+      let metaLines = [];
+      let inTable = false;
+      let tableHeaderSeen = false;
+
+      // ── Pass 1: extract table rows ─────────────────────────────────────────
+      for (const line of lines) {
+        const trimmed = line.trim();
+
+        // Markdown table row
+        if (trimmed.startsWith('|')) {
+          inTable = true;
+          // Skip separator rows (|---|---|---|)
+          if (/^\|[\s\-|]+\|$/.test(trimmed)) continue;
+          const cols = trimmed.split('|').map(c => c.trim()).filter(Boolean);
+          // Skip the header row (first row with text columns)
+          if (!tableHeaderSeen && cols.some(c => /^(time|event|title|slot)/i.test(c))) {
+            tableHeaderSeen = true;
+            continue;
+          }
+          if (cols.length >= 2) {
+            const timeStr = cols[0] || '';
+            const title   = cols[1] || '';
+            const notes   = cols[2] || '';
+            const isButler  = /\[butler\]/i.test(title + notes);
+            const isMaster  = /\[master\]/i.test(title + notes);
+            items.push({ timeStr, title, notes, isButler, isMaster });
+          }
+          continue;
+        }
+
+        // Bullet list row (- HH:MM Event)
+        if (trimmed.startsWith('- ')) {
+          const text = trimmed.slice(2).trim();
+          const isButler = /\[butler\]/i.test(text);
+          const isMaster = /\[master\]/i.test(text);
+          // Try to split "HH:MM AM – HH:MM PM Event" pattern
+          const timeMatch = text.match(/^(\d{1,2}:\d{2}\s*(?:AM|PM)?\s*[–\-]\s*\d{1,2}:\d{2}\s*(?:AM|PM)?)\s+(.+)$/i);
+          if (timeMatch) {
+            items.push({ timeStr: timeMatch[1], title: timeMatch[2], notes: '', isButler, isMaster });
+          } else {
+            items.push({ timeStr: '', title: text, notes: '', isButler, isMaster });
+          }
+          continue;
+        }
+
+        // Capture italicised meta lines (*...*) for footer
+        if (!inTable && (trimmed.startsWith('*') || trimmed.startsWith('_')) && trimmed.length > 2) {
+          metaLines.push(trimmed.replace(/^\*+|\*+$/g, '').replace(/^_+|_+$/g, ''));
+        }
+      }
+
+      // If nothing found, do nothing (keep empty state visible)
+      if (items.length === 0) return;
+
       document.getElementById('scheduleEmptyState').style.display = 'none';
       const view = document.getElementById('scheduleListView');
-      view.innerHTML = '<h2 style="margin-bottom:20px;">Today\'s Timeline</h2>';
-      
-      content.split('\n').forEach(line => {
-        if(line.startsWith('- ')) {
-          const text = line.replace('- ', '');
-          const isButler = text.includes('[Butler]');
-          const item = document.createElement('div');
-          item.className = `list-item ${isButler ? 'butler-tag' : ''}`;
-          item.innerHTML = `<div class="list-item-content"><div class="list-item-title">${escapeHtml(text)}</div></div>`;
-          view.appendChild(item);
-        }
+      view.innerHTML = '';
+
+      // Date header from content
+      const dateMatch = content.match(/\*\*Date:\*\*\s*(.+)/);
+      const tzMatch   = content.match(/\*\*Timezone:\*\*\s*(.+)/);
+      const dateStr   = dateMatch ? dateMatch[1].trim() : '';
+      const tzStr     = tzMatch   ? tzMatch[1].trim()   : '';
+
+      const header = document.createElement('div');
+      header.style.cssText = 'margin-bottom:20px;';
+      header.innerHTML = `
+        <h2 style="font-size:18px;font-weight:600;margin-bottom:4px;">Today's Timeline</h2>
+        ${dateStr ? `<div class="schedule-header">${escapeHtml(dateStr)}${tzStr ? ' · ' + escapeHtml(tzStr) : ''}</div>` : ''}
+      `;
+      view.appendChild(header);
+
+      // Render each timeline item
+      items.forEach(({ timeStr, title, notes, isButler, isMaster }) => {
+        const el = document.createElement('div');
+        el.className = 'schedule-item' + (isButler ? ' butler-event' : isMaster ? ' master-event' : '');
+        el.innerHTML = `
+          <div class="schedule-time">${escapeHtml(timeStr)}</div>
+          <div class="schedule-event">
+            <div class="schedule-event-title">${escapeHtml(title)}</div>
+            ${notes ? `<div class="schedule-event-notes">${escapeHtml(notes)}</div>` : ''}
+          </div>
+        `;
+        view.appendChild(el);
       });
+
+      // Footer meta line
+      if (metaLines.length > 0) {
+        const meta = document.createElement('div');
+        meta.className = 'schedule-meta';
+        meta.textContent = metaLines.join(' · ');
+        view.appendChild(meta);
+      }
     }
 
     // ============================================================
