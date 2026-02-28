@@ -1,42 +1,46 @@
 {
-  "SessionStart": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-init.sh"
-        }
-      ]
-    }
-  ],
-  "UserPromptSubmit": [
-    {
-      "hooks":[
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
-          "input": {
-            "event": "UserPromptSubmit",
-            "prompt": "{{prompt}}"
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-init.sh"
           }
-        }
-      ]
-    }
-  ],
-  "Stop": [
-    {
-      "hooks":[
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
-          "input": {
-            "event": "Stop",
-            "message": "{{last_assistant_message}}",
-            "text": "{{response_text}}"
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
+            "input": {
+              "event": "UserPromptSubmit",
+              "prompt": "{{prompt}}"
+            }
           }
-        }
-      ]
-    }
-  ]
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
+            "input": {
+              "event": "Stop",
+              "message": "{{last_assistant_message}}",
+              "text": "{{response_text}}"
+            }
+          }
+        ]
+      }
+    ]
+  }
 }

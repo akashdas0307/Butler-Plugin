@@ -9,6 +9,7 @@ Execute steps sequentially.
 ---
 
 ## 0. Resolve Workspace Paths
+**Architecture:** `butler/` is plugin infra. Core modules (CLAUDE.md etc.) live at the PARENT (workspace root).
 
 !`BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d -not -path "*/.local-plugins/*" -not -path "*/.skills/*" 2>/dev/null | head -1) && echo "CLAUDE_PLUGIN_ROOT=$BUTLER" && echo "CLAUDE_PROJECT_DIR=$BUTLER" && echo "OK"`
 
@@ -30,7 +31,7 @@ If `BUTLER` is empty → halt. The workspace is not mounted or butler folder is 
 
 Parse the output signal:
 
-- If `COLD_BOOT_STATUS=LOCAL_COMPLETE` → read `CONTEXT_DUMP.md` into context. Proceed to Step 2.
+- If `COLD_BOOT_STATUS=LOCAL_COMPLETE` → read `CONTEXT_DUMP.md` (inside `butler/`) into context. Proceed to Step 2.
 
 - If `COLD_BOOT_STATUS=NOTION_FETCH_REQUIRED`:
   - Read `core-modules-references.json`

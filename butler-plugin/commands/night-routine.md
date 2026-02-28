@@ -6,19 +6,36 @@ description: The 11 PM Scheduled Task. Triggers reflection, Notion sync, and dai
 
 Execute the Good Night protocol strictly and sequentially.
 
+## 0. Resolve Paths
+
+!`BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d -not -path "*/.local-plugins/*" -not -path "*/.skills/*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
+
+- `BUTLER` = butler/ folder (plugin infra, CONVERSATION.md, session files)
+- `PROJ` = workspace root (CLAUDE.md, USER.md, TASK.md, SOUL.md, SCRATCHPAD.md, MEMORYLOG.md)
+
 ## 1. Trigger Reflection
-Invoke the `reflection-agent` subagent: "Analyze today's `CONVERSATION.md` and update the `SCRATCHPAD.md` with behavioral hypotheses."
+
+Invoke the `reflection-agent` subagent: "Analyze today's `butler/CONVERSATION.md` and update the `SCRATCHPAD.md` (at workspace root) with behavioral hypotheses."
 Wait for the subagent to complete and return its findings.
 
 ## 2. Push to Permanent Memory
-Read the `core-modules-references.json`.
-Push the contents of all local core files to their respective Notion `page_id`s via the `notion-update-page` tool. 
+
+Read `butler/core-modules-references.json`.
+Push the contents of all core files at the **workspace root** to their respective Notion `page_id`s via `notion-update-page`.
+
+**Rate-limit rule:** Wait 0.5 seconds between each Notion call to prevent API 529 (Overloaded) errors.
+
+Core files to sync (all at workspace root, NOT inside butler/):
+- `CLAUDE.md`, `USER.md`, `SOUL.md`, `SCRATCHPAD.md`, `MEMORYLOG.md`, `TASK.md`
 
 ## 3. Archive & Cleanup
-1. Move today's `CONVERSATION.md` to an `archive/` folder, renaming it to `CONVERSATION_YYYY_MM_DD.md`.
-2. Clear the local `CONVERSATION.md` so it is blank for tomorrow.
-3. If the reflection agent proposed structural improvements to the plugin itself, append them to a local `Signoff.md` file for the Master to review at the end of the week.
+
+1. Copy `butler/CONVERSATION.md` to `archive/YYYY-MM-DD/CONVERSATION_YYYY-MM-DD.md` (archive at workspace root).
+2. Clear `butler/CONVERSATION.md` (truncate to blank for tomorrow).
+3. Clear `butler/NOTIFICATIONS.md` and `butler/SCHEDULE.md`.
+4. If the reflection agent proposed structural improvements to the plugin itself, append them to `SIGNOFF.md` at workspace root for the Master to review.
 
 ## 4. Signoff
+
 Output exactly: "Good night, Master. Patterns logged, Notion synced, and systems cleared for tomorrow."
 Terminate session.

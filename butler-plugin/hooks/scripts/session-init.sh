@@ -1,11 +1,23 @@
 #!/bin/bash
-# session-init.sh — Hot-load check. Fires at session start (PreToolUse or SessionStart).
-# Self-locates from script path — no hardcoded paths, no env var dependency.
+# session-init.sh — Hot-load check. Fires at SessionStart.
+# Reads today's CONTEXT_DUMP.md and prints it into context if fresh.
 
 # ── SELF-LOCATE ─────────────────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CLAUDE_PROJECT_DIR="$(cd "$CLAUDE_PLUGIN_ROOT/.." && pwd)"
+# The hook scripts live inside the read-only plugin cache (.local-plugins).
+# We must find the user's actual "butler" project folder in the workspace.
+BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d \
+  -not -path "*/.local-plugins/*" \
+  -not -path "*/.skills/*" \
+  2>/dev/null | head -1)
+
+if [ -z "$BUTLER" ]; then
+  # Fallback: resolve from script path (works if plugin is installed in workspace)
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  BUTLER="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+
+CLAUDE_PLUGIN_ROOT="$BUTLER"
+CLAUDE_PROJECT_DIR="$BUTLER"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 # ─────────────────────────────────────────────────────────────────────────────
 
