@@ -1,12 +1,25 @@
 #!/bin/bash
 # night-routine.sh — End-of-day reflection, Notion sync, archive, signoff.
-# Trigger time: ~23:00 (pattern-adaptive, not hardcoded — read from MEMORYLOG.md).
-# Self-locates from script path — no hardcoded paths, no env var dependency.
+# Trigger time: ~23:00 IST (scheduled via butler:night-routine command).
+#
+# Fix v1.2.8:
+#   - Self-locate via find (same as conversation-logger.sh) — old SCRIPT_DIR
+#     approach resolved into the read-only plugin cache, not the butler workspace.
+#   - Archive now truncates files instead of rm (avoids permission errors).
 
 # ── SELF-LOCATE ─────────────────────────────────────────────────────────────
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CLAUDE_PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CLAUDE_PROJECT_DIR="$(cd "$CLAUDE_PLUGIN_ROOT/.." && pwd)"
+BUTLER=$(find /sessions -maxdepth 10 -name "butler" -type d \
+  -not -path "*/.local-plugins/*" \
+  -not -path "*/.skills/*" \
+  2>/dev/null | head -1)
+
+if [ -z "$BUTLER" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  BUTLER="$(cd "$SCRIPT_DIR/../.." && pwd)"
+fi
+
+CLAUDE_PLUGIN_ROOT="$BUTLER"
+CLAUDE_PROJECT_DIR="$BUTLER"
 export CLAUDE_PLUGIN_ROOT CLAUDE_PROJECT_DIR
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -60,17 +73,17 @@ echo "SCRATCHPAD_REVIEW=PENDING_AGENT"
 ARCHIVE_DIR="$CLAUDE_PROJECT_DIR/archive/$TODAY"
 mkdir -p "$ARCHIVE_DIR"
 
-if [ -d "$CLAUDE_PROJECT_DIR/work" ]; then
-  # Move completed files (non-empty) to archive
-  find "$CLAUDE_PROJECT_DIR/work" -maxdepth 1 -type f | while read -r file; do
-    mv "$file" "$ARCHIVE_DIR/" && echo "ARCHIVED: $file"
-  done
+if [ -f "$CONV" ]; then
+  cp "$CONV" "$ARCHIVE_DIR/CONVERSATION_${TODAY}.md"
+  echo "ARCHIVED: CONVERSATION.md → archive/$TODAY/"
+  # Truncate (not rm) — workspace may restrict deletion
+  > "$CONV"
+  echo "Cleared: CONVERSATION.md"
 fi
 
-# Clear daily refresh files
-rm -f "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md"
-rm -f "$CLAUDE_PROJECT_DIR/SCHEDULE.md"
-echo "Cleared: NOTIFICATIONS.md, SCHEDULE.md"
+# Clear daily refresh files (truncate, not rm)
+[ -f "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md" ] && > "$CLAUDE_PROJECT_DIR/NOTIFICATIONS.md" && echo "Cleared: NOTIFICATIONS.md"
+[ -f "$CLAUDE_PROJECT_DIR/SCHEDULE.md" ]      && > "$CLAUDE_PROJECT_DIR/SCHEDULE.md"      && echo "Cleared: SCHEDULE.md"
 
 # ── 5. SIGNOFF ──────────────────────────────────────────────────────────────
 echo "Night routine complete: $DATE" >> "$CLAUDE_PROJECT_DIR/SIGNOFF.md"

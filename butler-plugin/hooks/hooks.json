@@ -15,7 +15,11 @@
       "hooks":[
         {
           "type": "command",
-          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh"
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
+          "input": {
+            "event": "UserPromptSubmit",
+            "prompt": "{{prompt}}"
+          }
         }
       ]
     }
@@ -27,6 +31,7 @@
           "type": "command",
           "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/conversation-logger.sh",
           "input": {
+            "event": "Stop",
             "message": "{{last_assistant_message}}",
             "text": "{{response_text}}"
           }
