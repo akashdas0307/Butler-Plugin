@@ -1,0 +1,8 @@
+# Ignore all files ending in .log
+*.log
+
+# Ignore the 'temp' directory and all its contents
+temp/
+
+# Reference file its used for only offline pourposes
+reference-documentation/
