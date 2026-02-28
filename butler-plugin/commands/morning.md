@@ -10,15 +10,23 @@ Execute steps sequentially.
 
 ## 0. Resolve Workspace Paths
 
-!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && echo "PLUGIN=$BUTLER" && echo "PROJECT=$(dirname "$BUTLER")" && echo "OK"`
+!`BUTLER=$(find /sessions -maxdepth 10 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && echo "CLAUDE_PLUGIN_ROOT=$BUTLER" && echo "CLAUDE_PROJECT_DIR=$(dirname "$BUTLER")" && echo "OK"`
 
 If `BUTLER` is empty → halt. Tell Master: "Cannot locate butler-plugin. Ensure workspace folder is mounted."
 
 ---
+## 0.5 — Local Directory & File Initialization
+
+**Step A — Resolve paths (run first, used by all steps below):**
+
+!`BUTLER=$(find /sessions -maxdepth 10 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && PROJ="$(dirname "$BUTLER")" && echo "PLUGIN=$BUTLER" && echo "PROJECT=$PROJ"`
+
+If `BUTLER` is empty → halt. The workspace is not mounted or butler-plugin folder is missing.
+
 
 ## 1. Cold Boot (Context Assembly)
 
-!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && bash "$BUTLER/scripts/cold-boot.sh"`
+!`BUTLER=$(find /sessions -maxdepth 10 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && bash "$BUTLER/scripts/cold-boot.sh"`
 
 Parse the output signal:
 
