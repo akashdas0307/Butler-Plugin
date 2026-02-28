@@ -1,6 +1,6 @@
 {
   "name": "butler-plugin",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "An AI Chief of Staff (Butler) managing tasks, emails, calendar, and a persistent memory, This will evolve to the helping agent when used regularly.",
   "author": {
     "name": "Akash Das"

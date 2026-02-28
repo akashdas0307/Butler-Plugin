@@ -18,7 +18,7 @@ If `BUTLER` is empty → halt. Tell Master: "Cannot locate butler-plugin. Ensure
 
 ## 1. Cold Boot (Context Assembly)
 
-!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && bash "$BUTLER/hooks/scripts/cold-boot.sh"`
+!`BUTLER=$(find /sessions -maxdepth 5 -name "butler-plugin" -type d -not -path "*/.*" 2>/dev/null | head -1) && bash "$BUTLER/scripts/cold-boot.sh"`
 
 Parse the output signal:
 
